@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Quiz from './components/Quiz';
 import ConfigGrid from './components/ConfigGrid';
-import { Verb } from './types';
 import ErrorBoundary from './components/ErrorBoundary';
+import { Verb } from './types';
+
+// Use Env Var
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 function App() {
   const [view, setView] = useState<'quiz' | 'config'>('config');
@@ -10,10 +13,15 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   const fetchVerbs = async () => {
-    const res = await fetch('http://localhost:3001/api/verbs');
-    const data = await res.json();
-    setVerbs(data);
-    setLoading(false);
+    try {
+      const res = await fetch(`${API_URL}/verbs`);
+      const data = await res.json();
+      setVerbs(data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Failed to load verbs", err);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -28,17 +36,20 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-red-900 selection:text-white">
-      {/* BRAND HEADER */}
       <nav className="border-b border-red-900/30 bg-gradient-to-r from-slate-900 to-slate-950 shadow-lg relative overflow-hidden">
-        {/* Decorative 'Torii' top bar */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-700 via-red-500 to-red-700"></div>
         
         <div className="container mx-auto px-6 py-4 flex justify-between items-center relative z-10">
-          <div className="flex items-center gap-3 select-none cursor-pointer" onClick={() => setView('config')}>
+          {/* ACCESSIBILITY FIX: Use button */}
+          <button 
+            className="flex items-center gap-3 select-none hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-red-500 rounded p-1" 
+            onClick={() => setView('config')}
+            aria-label="Go to Configuration Grid"
+          >
             <div className="flex flex-col items-center justify-center w-10 h-10 bg-red-600 rounded text-slate-900 font-black text-xl leading-none shadow-red-500/20 shadow-lg">
-              <span>日</span>
+              <span aria-hidden="true">日</span>
             </div>
-            <div>
+            <div className="text-left">
               <h1 className="text-2xl font-black tracking-tighter text-white">
                 NIHON<span className="text-red-500">JUGATE</span>
               </h1>
@@ -46,7 +57,7 @@ function App() {
                 Tactical Verb Systems
               </p>
             </div>
-          </div>
+          </button>
 
           <div className="flex gap-2 bg-slate-900/50 p-1 rounded-lg border border-slate-800">
             <button 

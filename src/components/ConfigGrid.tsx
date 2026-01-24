@@ -6,6 +6,8 @@ interface Props {
   onUpdate: () => void;
 }
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
 const ConfigGrid: React.FC<Props> = ({ verbs, onUpdate }) => {
   
   // Group by Dictionary Form
@@ -17,7 +19,7 @@ const ConfigGrid: React.FC<Props> = ({ verbs, onUpdate }) => {
 
   const toggleVerb = async (id: number, currentStatus: number) => {
     // Optimistic UI update could go here, but for now we wait for server
-    await fetch('http://localhost:3001/api/verbs/toggle', {
+    await fetch(`${API_URL}/verbs/toggle`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, is_active: !currentStatus })
@@ -29,7 +31,7 @@ const ConfigGrid: React.FC<Props> = ({ verbs, onUpdate }) => {
   const handleBulkAction = async (setActive: boolean) => {
     if (!confirm(setActive ? "Enable ALL verbs?" : "Disable ALL verbs? This will clear your current selection.")) return;
     
-    await fetch('http://localhost:3001/api/verbs/bulk-toggle', {
+    await fetch(`${API_URL}/verbs/bulk-toggle`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ set_active: setActive })

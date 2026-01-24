@@ -8,7 +8,7 @@
 
 ## ⚔️ Overview
 
-**Nihonjugate** is a full-stack study tool designed to drill Japanese verb conjugations. Unlike standard flashcards, it focuses purely on the mechanical rules of morphology across 12 different verb forms (Past, Te-form, Causative-Passive, etc.).
+**Nihonjugate** is a full-stack study tool designed to drill Japanese verb conjugations. Unlike standard flashcards, it focuses purely on the mechanical rules of morphology across **15 verb forms** (e.g., Past, Te-form, Causative-Passive, etc.).
 
 It utilizes a **Weighted Random Algorithm** to prioritize verbs and forms you are struggling with, ensuring efficient training sessions.
 

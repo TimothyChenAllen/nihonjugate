@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { toHiragana } from 'wanakana';
 import { Verb } from '../types';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 interface Props {
   verbs: Verb[];
@@ -25,7 +27,8 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
   const rank = getRank(streak);
 
   // LOGIC: Select Verb
-  const nextQuestion = () => {
+  // Wrapped in useCallback to stabilize the function reference
+  const nextQuestion = useCallback(() => {
     const activeVerbs = verbs.filter(v => v.is_active);
     if (activeVerbs.length === 0) return;
 
@@ -46,17 +49,20 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     setCurrentVerb(selected);
     setInput('');
     setFeedback('idle');
-    // Re-focus input after a slight delay to ensure render is done
     setTimeout(() => inputRef.current?.focus(), 50);
-  };
+  }, [verbs]); // Re-create only when verbs change
 
-  // Run once on mount
-  useEffect(() => { nextQuestion(); }, [verbs]);
+  // FIX: Run only once on mount, or when verbs actually update (e.g. initial load)
+  // If we just entered "Duel" mode, verbs are stable.
+  useEffect(() => { 
+    if (!currentVerb && verbs.length > 0) {
+      nextQuestion(); 
+    }
+  }, [verbs, nextQuestion, currentVerb]);
 
-  // NEW: Global Key Listener for "Enter to Continue"
+  // FIX: Global Key Listener
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Only trigger if we are showing feedback and the key is Enter
       if (feedback !== 'idle' && e.key === 'Enter') {
         e.preventDefault();
         onComplete();
@@ -66,9 +72,8 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [feedback, verbs]); // Dependencies ensure it grabs the latest state
+  }, [feedback, onComplete, nextQuestion]); 
 
-  // LOGIC: Handle Input
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = toHiragana(e.target.value, { IMEMode: true });
     setInput(newVal);
@@ -78,7 +83,6 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     e.preventDefault();
     if (!currentVerb || feedback !== 'idle') return;
 
-    // Normalize for check
     const normalizedInput = toHiragana(input);
     const correctKana = toHiragana(currentVerb.conj_kana);
     const correctKanji = currentVerb.conj_kanji;
@@ -90,7 +94,8 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     else setStreak(0);
 
     try {
-      await fetch('http://localhost:3001/api/quiz/result', {
+      // FIX: Use API_URL var
+      await fetch(`${API_URL}/quiz/result`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: currentVerb.id, correct: isCorrect })
@@ -108,9 +113,10 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     </div>
   );
 
+  // ... (JSX Return same as before)
   return (
     <div className="max-w-xl mx-auto mt-8">
-      {/* HUD */}
+      {/* ... HUD ... */}
       <div className="flex items-end justify-between mb-2 px-2">
         <div className={`text-sm font-bold tracking-widest ${rank.color} flex items-center gap-2`}>
           <span className="text-xl">{rank.icon}</span> {rank.title}
@@ -120,7 +126,7 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
         </div>
       </div>
       
-      {/* Progress Bar */}
+      {/* ... Progress Bar ... */}
       <div className="h-1 w-full bg-slate-800 rounded-full mb-8 overflow-hidden">
         <div 
           className="h-full bg-gradient-to-r from-blue-600 via-purple-500 to-red-500 transition-all duration-500"
@@ -157,8 +163,6 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
               type="text"
               value={input}
               onChange={handleInputChange}
-              // FIX: We no longer disable the input, we just make it readOnly
-              // This keeps focus alive (sometimes) but the Window Listener ensures Enter works regardless.
               readOnly={feedback !== 'idle'}
               className={`w-full bg-slate-950/80 backdrop-blur-sm border-b-4 text-center text-3xl py-4 outline-none transition-all font-medium
                 ${feedback === 'idle' ? 'border-slate-700 focus:border-red-500 text-white placeholder:text-slate-700' : ''}
