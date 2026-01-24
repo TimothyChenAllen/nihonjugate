@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import db, { seedData } from './db';
+import db, { seedData } from './db.ts'; // Kept your manual .ts fix
 
 const app = express();
 app.use(cors());
@@ -10,7 +10,8 @@ app.use(express.json());
 seedData();
 
 // Get all verbs/forms with their mastery data
-app.get('/api/verbs', (req, res) => {
+// FIX: changed 'req' to '_req' to satisfy noUnusedParameters
+app.get('/api/verbs', (_req, res) => {
   const stmt = db.prepare('SELECT * FROM verbs');
   const verbs = stmt.all();
   res.json(verbs);
@@ -36,6 +37,15 @@ app.post('/api/quiz/result', (req, res) => {
   stmt.run(newCorrect, newAttempt, id);
   
   res.json({ success: true, newCorrect, newAttempt });
+});
+
+// NEW: Bulk update all verbs
+app.post('/api/verbs/bulk-toggle', (req, res) => {
+  const { set_active } = req.body; // true or false
+  const val = set_active ? 1 : 0;
+  const stmt = db.prepare('UPDATE verbs SET is_active = ?');
+  stmt.run(val);
+  res.json({ success: true });
 });
 
 const PORT = 3001;

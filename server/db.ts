@@ -1,6 +1,4 @@
 import Database from 'better-sqlite3';
-import fs from 'fs';
-import path from 'path';
 import { parse } from 'csv-parse/sync';
 
 const db = new Database('verbs.db');
@@ -37,7 +35,7 @@ db.exec(`
   )
 `);
 
-// The CSV Data (Embedded for simplicity, or load from file)
+// The CSV Data 
 const CSV_DATA = `Dictionary_Kanji,Dictionary_Kana,Dictionary_Romaji,Meaning,Form_Name,Conj_Kanji,Conj_Kana,Conj_Romaji
 食べる,たべる,Taberu,To eat,Polite Form,食べます,たべます,Tabemasu
 食べる,たべる,Taberu,To eat,Masu Stem,食べ,たべ,Tabe
