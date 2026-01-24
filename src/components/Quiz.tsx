@@ -14,6 +14,10 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
   const [input, setInput] = useState('');
   const [feedback, setFeedback] = useState<'idle' | 'correct' | 'incorrect'>('idle');
   const [streak, setStreak] = useState(0);
+  
+  // NEW: State to control visibility of Kana/Meaning
+  const [showHint, setShowHint] = useState(false);
+  
   const inputRef = useRef<HTMLInputElement>(null);
 
   const getRank = (s: number) => {
@@ -26,8 +30,6 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
 
   const rank = getRank(streak);
 
-  // LOGIC: Select Verb
-  // Wrapped in useCallback to stabilize the function reference
   const nextQuestion = useCallback(() => {
     const activeVerbs = verbs.filter(v => v.is_active);
     if (activeVerbs.length === 0) return;
@@ -49,18 +51,16 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     setCurrentVerb(selected);
     setInput('');
     setFeedback('idle');
+    setShowHint(false); // <--- Reset hint visibility on new question
     setTimeout(() => inputRef.current?.focus(), 50);
-  }, [verbs]); // Re-create only when verbs change
+  }, [verbs]);
 
-  // FIX: Run only once on mount, or when verbs actually update (e.g. initial load)
-  // If we just entered "Duel" mode, verbs are stable.
   useEffect(() => { 
     if (!currentVerb && verbs.length > 0) {
       nextQuestion(); 
     }
   }, [verbs, nextQuestion, currentVerb]);
 
-  // FIX: Global Key Listener
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if (feedback !== 'idle' && e.key === 'Enter') {
@@ -90,11 +90,13 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     const isCorrect = normalizedInput === correctKana || input === correctKanji;
 
     setFeedback(isCorrect ? 'correct' : 'incorrect');
+    // If they get it wrong, we auto-reveal the hint so they know what word it was
+    if (!isCorrect) setShowHint(true); 
+
     if (isCorrect) setStreak(s => s + 1);
     else setStreak(0);
 
     try {
-      // FIX: Use API_URL var
       await fetch(`${API_URL}/quiz/result`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -113,10 +115,9 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     </div>
   );
 
-  // ... (JSX Return same as before)
   return (
     <div className="max-w-xl mx-auto mt-8">
-      {/* ... HUD ... */}
+      {/* HUD */}
       <div className="flex items-end justify-between mb-2 px-2">
         <div className={`text-sm font-bold tracking-widest ${rank.color} flex items-center gap-2`}>
           <span className="text-xl">{rank.icon}</span> {rank.title}
@@ -126,7 +127,7 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
         </div>
       </div>
       
-      {/* ... Progress Bar ... */}
+      {/* Progress Bar */}
       <div className="h-1 w-full bg-slate-800 rounded-full mb-8 overflow-hidden">
         <div 
           className="h-full bg-gradient-to-r from-blue-600 via-purple-500 to-red-500 transition-all duration-500"
@@ -145,8 +146,27 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
             <h2 className="text-7xl font-black mb-4 text-white drop-shadow-lg tracking-wide">
               {currentVerb.dictionary_kanji}
             </h2>
-            <div className="inline-block px-4 py-1 bg-slate-800 rounded text-slate-400 text-sm mb-6 border border-slate-700">
-              {currentVerb.dictionary_kana} • {currentVerb.meaning}
+            
+            {/* HINT TOGGLE AREA */}
+            <div 
+              onClick={() => setShowHint(true)}
+              className={`inline-block px-4 py-2 bg-slate-800 rounded text-slate-400 text-sm mb-6 border border-slate-700 cursor-pointer transition-all duration-300 select-none hover:bg-slate-700 hover:border-slate-600`}
+              title="Click to reveal definition"
+            >
+               {/* Logic: 
+                  - If showHint is TRUE: Text is visible (filter-none)
+                  - If showHint is FALSE: Text is blurred (blur-md) and partially transparent
+               */}
+              <span className={`transition-all duration-500 ${showHint ? 'filter-none opacity-100' : 'blur-md opacity-40'}`}>
+                {currentVerb.dictionary_kana} • {currentVerb.meaning}
+              </span>
+              
+              {/* Optional: 'Encrypted' label when hidden */}
+              {!showHint && (
+                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] uppercase tracking-widest text-red-500/50 font-bold pointer-events-none">
+                  [ Encrypted ]
+                </span>
+              )}
             </div>
             
             <div className="flex items-center justify-center gap-3 text-lg">
