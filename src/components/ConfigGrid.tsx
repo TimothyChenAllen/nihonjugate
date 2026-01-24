@@ -6,9 +6,11 @@ interface Props {
   onUpdate: () => void;
 }
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
 const ConfigGrid: React.FC<Props> = ({ verbs, onUpdate }) => {
   
-  // Group by Dictionary Form for easier layout
+  // Group by Dictionary Form
   const grouped = verbs.reduce((acc, verb) => {
     if (!acc[verb.dictionary_kanji]) acc[verb.dictionary_kanji] = [];
     acc[verb.dictionary_kanji].push(verb);
@@ -16,7 +18,8 @@ const ConfigGrid: React.FC<Props> = ({ verbs, onUpdate }) => {
   }, {} as Record<string, Verb[]>);
 
   const toggleVerb = async (id: number, currentStatus: number) => {
-    await fetch('http://localhost:3001/api/verbs/toggle', {
+    // Optimistic UI update could go here, but for now we wait for server
+    await fetch(`${API_URL}/verbs/toggle`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, is_active: !currentStatus })
@@ -24,9 +27,21 @@ const ConfigGrid: React.FC<Props> = ({ verbs, onUpdate }) => {
     onUpdate();
   };
 
+  // NEW: Handle Bulk Actions
+  const handleBulkAction = async (setActive: boolean) => {
+    if (!confirm(setActive ? "Enable ALL verbs?" : "Disable ALL verbs? This will clear your current selection.")) return;
+    
+    await fetch(`${API_URL}/verbs/bulk-toggle`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ set_active: setActive })
+    });
+    onUpdate();
+  };
+
   const getMasteryColor = (v: Verb) => {
-    if (!v.is_active) return 'bg-slate-800 border-slate-700 opacity-50'; // Disabled
-    if (v.attempt_count === 0) return 'bg-slate-700 border-slate-600'; // Untouched
+    if (!v.is_active) return 'bg-slate-900 border-slate-800 text-slate-600'; // Disabled (Darker, recessed)
+    if (v.attempt_count === 0) return 'bg-slate-700 border-slate-600 text-white'; // Active, Untouched
     
     const rate = v.correct_count / v.attempt_count;
     if (rate >= 0.9 && v.attempt_count > 3) return 'bg-emerald-900 border-emerald-500 text-emerald-100'; // Mastered
@@ -35,39 +50,61 @@ const ConfigGrid: React.FC<Props> = ({ verbs, onUpdate }) => {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="bg-slate-800 p-6 rounded-lg border border-slate-700">
-        <h2 className="text-xl font-bold mb-4">Training Configuration</h2>
-        <div className="flex gap-4 text-sm mb-4">
-          <span className="flex items-center gap-2"><div className="w-3 h-3 bg-slate-700 border border-slate-600"></div> Not Started</span>
+    <div className="space-y-8 pb-20">
+      <div className="bg-slate-900 p-6 rounded-lg border border-red-900/30 shadow-lg">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <h2 className="text-xl font-bold text-red-500 tracking-widest uppercase">Mission Config</h2>
+          
+          {/* NEW: Bulk Controls */}
+          <div className="flex gap-2">
+            <button 
+              onClick={() => handleBulkAction(false)}
+              className="px-3 py-1 text-xs font-bold border border-slate-600 text-slate-400 rounded hover:bg-slate-800 hover:text-white transition-colors"
+            >
+              DESELECT ALL
+            </button>
+            <button 
+              onClick={() => handleBulkAction(true)}
+              className="px-3 py-1 text-xs font-bold border border-slate-600 text-slate-400 rounded hover:bg-slate-800 hover:text-white transition-colors"
+            >
+              SELECT ALL
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-4 text-xs font-mono text-slate-400">
+          <span className="flex items-center gap-2"><div className="w-3 h-3 bg-slate-700 border border-slate-600"></div> Active</span>
+          <span className="flex items-center gap-2"><div className="w-3 h-3 bg-slate-900 border border-slate-800"></div> Inactive</span>
           <span className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-900 border border-amber-500"></div> Struggling</span>
           <span className="flex items-center gap-2"><div className="w-3 h-3 bg-emerald-900 border border-emerald-500"></div> Mastered</span>
-          <span className="flex items-center gap-2"><div className="w-3 h-3 bg-slate-800 border border-slate-700 opacity-50"></div> Inactive</span>
         </div>
-        <p className="text-slate-400">Click a cell to toggle it for the quiz.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Object.entries(grouped).map(([kanji, forms]) => (
-          <div key={kanji} className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
-            <div className="p-3 bg-slate-900 border-b border-slate-700 flex justify-between items-center">
+          <div key={kanji} className="bg-slate-950 rounded-lg overflow-hidden border border-slate-800 shadow-sm hover:border-slate-600 transition-colors">
+            <div className="p-3 bg-slate-900/50 border-b border-slate-800 flex justify-between items-center">
               <div>
-                <span className="text-2xl font-bold mr-2">{kanji}</span>
-                <span className="text-slate-400 text-sm">({forms[0].dictionary_kana})</span>
+                <span className="text-2xl font-black mr-2 text-slate-200">{kanji}</span>
+                <span className="text-slate-500 text-sm font-mono">({forms[0].dictionary_kana})</span>
               </div>
-              <span className="text-xs text-slate-500">{forms[0].meaning}</span>
+              <span className="text-[10px] uppercase tracking-wider text-slate-600 font-bold">{forms[0].meaning}</span>
             </div>
             <div className="grid grid-cols-2 gap-1 p-2">
               {forms.map(v => (
                 <button
                   key={v.id}
                   onClick={() => toggleVerb(v.id, v.is_active)}
-                  className={`p-2 text-xs text-left border rounded transition-all ${getMasteryColor(v)}`}
+                  className={`p-2 text-xs text-left border rounded transition-all duration-200 ${getMasteryColor(v)}`}
                 >
-                  <div className="font-semibold truncate">{v.form_name}</div>
-                  <div className="text-[10px] opacity-70">
-                    {v.correct_count}/{v.attempt_count}
-                  </div>
+                  <div className="font-bold truncate">{v.form_name}</div>
+                  {v.is_active ? (
+                    <div className="text-[10px] opacity-70 mt-1">
+                      {v.attempt_count > 0 ? `${Math.round((v.correct_count/v.attempt_count)*100)}%` : 'READY'}
+                    </div>
+                  ) : (
+                    <div className="text-[10px] opacity-30 mt-1">OFFLINE</div>
+                  )}
                 </button>
               ))}
             </div>
