@@ -82,11 +82,14 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     e.preventDefault();
     if (!currentVerb || feedback !== 'idle') return;
 
-    const normalizedInput = toHiragana(input);
+    // Safety trim for mobile keyboards
+    const cleanInput = input.trim();
+    const normalizedInput = toHiragana(cleanInput);
+    
     const correctKana = toHiragana(currentVerb.conj_kana);
     const correctKanji = currentVerb.conj_kanji;
 
-    const isCorrect = normalizedInput === correctKana || input === correctKanji;
+    const isCorrect = normalizedInput === correctKana || cleanInput === correctKanji;
 
     setFeedback(isCorrect ? 'correct' : 'incorrect');
     if (!isCorrect) setShowHint(true); 
@@ -147,28 +150,21 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
             
             {/* HINT TOGGLE AREA */}
             <button 
-              type="button" // Use semantic button for A11y
+              type="button"
               onClick={() => setShowHint(true)}
-              // Added 'relative' to parent to ensure absolute child is positioned correctly
-              // Added focus styles for keyboard users
               className={`relative inline-block px-4 py-2 bg-slate-800 rounded text-slate-400 text-sm mb-6 border border-slate-700 cursor-pointer transition-all duration-300 select-none hover:bg-slate-700 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500`}
               title="Click to reveal definition"
               aria-label={showHint ? "Definition revealed" : "Click to reveal definition hint"}
               aria-pressed={showHint}
             >
-               {/* Logic: 
-                  - If showHint is TRUE: Text is visible (filter-none)
-                  - If showHint is FALSE: Text is blurred (blur-md) and partially transparent
-                  - aria-hidden ensures screen readers do not read the answer while it is encrypted
-               */}
               <span 
                 aria-hidden={!showHint}
-                className={`transition-all duration-500 ${showHint ? 'filter-none opacity-100' : 'blur-md opacity-40'}`}
+                // 'block' added here for mobile blur support
+                className={`block transition-all duration-500 ${showHint ? 'filter-none opacity-100' : 'blur-md opacity-40'}`}
               >
                 {currentVerb.dictionary_kana} • {currentVerb.meaning}
               </span>
               
-              {/* Optional: 'Encrypted' label when hidden */}
               {!showHint && (
                 <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] uppercase tracking-widest text-red-500/50 font-bold pointer-events-none">
                   [ Encrypted ]
@@ -191,6 +187,11 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
               value={input}
               onChange={handleInputChange}
               readOnly={feedback !== 'idle'}
+              // Mobile Optimizations
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
               className={`w-full bg-slate-950/80 backdrop-blur-sm border-b-4 text-center text-3xl py-4 outline-none transition-all font-medium
                 ${feedback === 'idle' ? 'border-slate-700 focus:border-red-500 text-white placeholder:text-slate-700' : ''}
                 ${feedback === 'correct' ? 'border-emerald-500 text-emerald-400 bg-emerald-950/20' : ''}
@@ -202,7 +203,6 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
             />
           </form>
 
-          {/* Feedback Area */}
           <div className="h-24 mt-6 flex items-center justify-center">
             {feedback === 'correct' && (
               <div className="animate-bounce-in">
