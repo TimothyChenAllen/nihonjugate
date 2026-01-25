@@ -15,7 +15,6 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
   const [feedback, setFeedback] = useState<'idle' | 'correct' | 'incorrect'>('idle');
   const [streak, setStreak] = useState(0);
   
-  // NEW: State to control visibility of Kana/Meaning
   const [showHint, setShowHint] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,7 +50,7 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     setCurrentVerb(selected);
     setInput('');
     setFeedback('idle');
-    setShowHint(false); // <--- Reset hint visibility on new question
+    setShowHint(false);
     setTimeout(() => inputRef.current?.focus(), 50);
   }, [verbs]);
 
@@ -90,7 +89,6 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     const isCorrect = normalizedInput === correctKana || input === correctKanji;
 
     setFeedback(isCorrect ? 'correct' : 'incorrect');
-    // If they get it wrong, we auto-reveal the hint so they know what word it was
     if (!isCorrect) setShowHint(true); 
 
     if (isCorrect) setStreak(s => s + 1);
@@ -148,16 +146,25 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
             </h2>
             
             {/* HINT TOGGLE AREA */}
-            <div 
+            <button 
+              type="button" // Use semantic button for A11y
               onClick={() => setShowHint(true)}
-              className={`inline-block px-4 py-2 bg-slate-800 rounded text-slate-400 text-sm mb-6 border border-slate-700 cursor-pointer transition-all duration-300 select-none hover:bg-slate-700 hover:border-slate-600`}
+              // Added 'relative' to parent to ensure absolute child is positioned correctly
+              // Added focus styles for keyboard users
+              className={`relative inline-block px-4 py-2 bg-slate-800 rounded text-slate-400 text-sm mb-6 border border-slate-700 cursor-pointer transition-all duration-300 select-none hover:bg-slate-700 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500`}
               title="Click to reveal definition"
+              aria-label={showHint ? "Definition revealed" : "Click to reveal definition hint"}
+              aria-pressed={showHint}
             >
                {/* Logic: 
                   - If showHint is TRUE: Text is visible (filter-none)
                   - If showHint is FALSE: Text is blurred (blur-md) and partially transparent
+                  - aria-hidden ensures screen readers do not read the answer while it is encrypted
                */}
-              <span className={`transition-all duration-500 ${showHint ? 'filter-none opacity-100' : 'blur-md opacity-40'}`}>
+              <span 
+                aria-hidden={!showHint}
+                className={`transition-all duration-500 ${showHint ? 'filter-none opacity-100' : 'blur-md opacity-40'}`}
+              >
                 {currentVerb.dictionary_kana} • {currentVerb.meaning}
               </span>
               
@@ -167,7 +174,7 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
                   [ Encrypted ]
                 </span>
               )}
-            </div>
+            </button>
             
             <div className="flex items-center justify-center gap-3 text-lg">
               <span className="text-slate-500">Form:</span>
