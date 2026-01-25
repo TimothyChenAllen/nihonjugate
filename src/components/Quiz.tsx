@@ -82,7 +82,6 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     e.preventDefault();
     if (!currentVerb || feedback !== 'idle') return;
 
-    // Safety trim for mobile keyboards
     const cleanInput = input.trim();
     const normalizedInput = toHiragana(cleanInput);
     
@@ -117,49 +116,53 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
   );
 
   return (
-    <div className="max-w-xl mx-auto mt-8">
-      {/* HUD */}
-      <div className="flex items-end justify-between mb-2 px-2">
-        <div className={`text-sm font-bold tracking-widest ${rank.color} flex items-center gap-2`}>
-          <span className="text-xl">{rank.icon}</span> {rank.title}
-        </div>
-        <div className="text-slate-400 font-mono text-sm">
-          COMBO: <span className="text-white text-xl">{streak}</span>
-        </div>
-      </div>
+    // FIX 1 & 2: 
+    // - justify-start: Anchors content to top on mobile (Fixes the gap & keyboard issue)
+    // - md:justify-center: Keeps it centered on Desktop
+    // - pt-4: Adds breathing room at the top on mobile so it's not glued to the header
+    <div className="max-w-xl mx-auto min-h-[100dvh] flex flex-col justify-start md:justify-center p-4 pt-4 md:pt-0">
       
-      {/* Progress Bar */}
-      <div className="h-1 w-full bg-slate-800 rounded-full mb-8 overflow-hidden">
-        <div 
-          className="h-full bg-gradient-to-r from-blue-600 via-purple-500 to-red-500 transition-all duration-500"
-          style={{ width: `${Math.min(streak * 2, 100)}%` }}
-        />
+      <div className="flex-shrink-0">
+        <div className="flex items-end justify-between mb-2 px-2">
+          <div className={`text-sm font-bold tracking-widest ${rank.color} flex items-center gap-2`}>
+            <span className="text-xl">{rank.icon}</span> {rank.title}
+          </div>
+          <div className="text-slate-400 font-mono text-sm">
+            COMBO: <span className="text-white text-xl">{streak}</span>
+          </div>
+        </div>
+        
+        {/* FIX 3: Tighter margin (mb-2) on mobile to save vertical pixels */}
+        <div className="h-1 w-full bg-slate-800 rounded-full mb-2 md:mb-8 overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-blue-600 via-purple-500 to-red-500 transition-all duration-500"
+            style={{ width: `${Math.min(streak * 2, 100)}%` }}
+          />
+        </div>
       </div>
 
-      {/* Main Card */}
-      <div className="bg-slate-900 rounded-xl overflow-hidden shadow-2xl border border-slate-800 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[15rem] font-black text-white/5 pointer-events-none select-none">
+      <div className="bg-slate-900 rounded-xl overflow-hidden shadow-2xl border border-slate-800 relative w-full">
+        
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8rem] md:text-[15rem] font-black text-white/5 pointer-events-none select-none">
           {currentVerb.dictionary_kanji}
         </div>
 
-        <div className="relative z-10 p-12 text-center">
-          <div className="mb-8">
-            <h2 className="text-7xl font-black mb-4 text-white drop-shadow-lg tracking-wide">
+        <div className="relative z-10 p-6 md:p-12 text-center">
+          <div className="mb-4 md:mb-8">
+            <h2 className="text-5xl md:text-7xl font-black mb-2 md:mb-4 text-white drop-shadow-lg tracking-wide">
               {currentVerb.dictionary_kanji}
             </h2>
             
-            {/* HINT TOGGLE AREA */}
             <button 
               type="button"
               onClick={() => setShowHint(true)}
-              className={`relative inline-block px-4 py-2 bg-slate-800 rounded text-slate-400 text-sm mb-6 border border-slate-700 cursor-pointer transition-all duration-300 select-none hover:bg-slate-700 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500`}
+              className={`relative inline-block px-4 py-2 bg-slate-800 rounded text-slate-400 text-sm mb-4 md:mb-6 border border-slate-700 cursor-pointer transition-all duration-300 select-none hover:bg-slate-700 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500`}
               title="Click to reveal definition"
               aria-label={showHint ? "Definition revealed" : "Click to reveal definition hint"}
               aria-pressed={showHint}
             >
               <span 
                 aria-hidden={!showHint}
-                // 'block' added here for mobile blur support
                 className={`block transition-all duration-500 ${showHint ? 'filter-none opacity-100' : 'blur-md opacity-40'}`}
               >
                 {currentVerb.dictionary_kana} • {currentVerb.meaning}
@@ -172,7 +175,7 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
               )}
             </button>
             
-            <div className="flex items-center justify-center gap-3 text-lg">
+            <div className="flex items-center justify-center gap-3 text-base md:text-lg">
               <span className="text-slate-500">Form:</span>
               <span className="font-bold text-red-400 border-b-2 border-red-900/50 pb-0.5">
                 {currentVerb.form_name}
@@ -187,12 +190,11 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
               value={input}
               onChange={handleInputChange}
               readOnly={feedback !== 'idle'}
-              // Mobile Optimizations
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck="false"
-              className={`w-full bg-slate-950/80 backdrop-blur-sm border-b-4 text-center text-3xl py-4 outline-none transition-all font-medium
+              className={`w-full bg-slate-950/80 backdrop-blur-sm border-b-4 text-center text-2xl md:text-3xl py-3 md:py-4 outline-none transition-all font-medium
                 ${feedback === 'idle' ? 'border-slate-700 focus:border-red-500 text-white placeholder:text-slate-700' : ''}
                 ${feedback === 'correct' ? 'border-emerald-500 text-emerald-400 bg-emerald-950/20' : ''}
                 ${feedback === 'incorrect' ? 'border-red-500 text-red-500 bg-red-950/20' : ''}
@@ -203,21 +205,21 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
             />
           </form>
 
-          <div className="h-24 mt-6 flex items-center justify-center">
+          <div className="h-20 md:h-24 mt-4 md:mt-6 flex items-center justify-center">
             {feedback === 'correct' && (
               <div className="animate-bounce-in">
-                <div className="text-emerald-400 font-bold text-xl tracking-wider mb-1">IPPON! (Correct)</div>
-                <div className="text-slate-400 font-mono">{currentVerb.conj_kanji} / {currentVerb.conj_kana}</div>
+                <div className="text-emerald-400 font-bold text-lg md:text-xl tracking-wider mb-1">IPPON! (Correct)</div>
+                <div className="text-slate-400 font-mono text-sm md:text-base">{currentVerb.conj_kanji} / {currentVerb.conj_kana}</div>
                 <div className="mt-2 text-xs uppercase tracking-widest text-slate-500 opacity-50">[ Press Enter ]</div>
               </div>
             )}
             {feedback === 'incorrect' && (
               <div className="animate-shake">
-                <div className="text-red-500 font-bold text-xl tracking-wider mb-1">KILLED IN ACTION</div>
-                <div className="text-slate-400">
+                <div className="text-red-500 font-bold text-lg md:text-xl tracking-wider mb-1">KILLED IN ACTION</div>
+                <div className="text-slate-400 text-sm md:text-base">
                   Answer: <span className="text-white font-bold">{currentVerb.conj_kanji}</span>
                 </div>
-                <div className="text-slate-500 text-sm mt-1">
+                <div className="text-slate-500 text-xs md:text-sm mt-1">
                  ({currentVerb.conj_kana})
                 </div>
                 <div className="mt-4 text-xs uppercase tracking-widest text-slate-500 opacity-50">[ Press Enter to Revive ]</div>
