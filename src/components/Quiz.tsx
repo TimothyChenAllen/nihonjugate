@@ -120,7 +120,7 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     // - justify-start: Anchors content to top on mobile (Fixes the gap & keyboard issue)
     // - md:justify-center: Keeps it centered on Desktop
     // - pt-4: Adds breathing room at the top on mobile so it's not glued to the header
-    <div className="max-w-xl mx-auto min-h-[100dvh] flex flex-col justify-start md:justify-center p-4 pt-4 md:pt-0">
+    <div className="max-w-xl mx-auto min-h-[100dvh] flex flex-col justify-start md:justify-center p-4 pt-20 md:pt-0">
       
       <div className="flex-shrink-0">
         <div className="flex items-end justify-between mb-2 px-2">
