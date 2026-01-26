@@ -10,23 +10,16 @@ interface Props {
 }
 
 // -- SUB-COMPONENT: AUDIO BUTTON --
-// Extracted for DRY/SoC and performance
 const AudioButton: React.FC<{ text: string }> = ({ text }) => {
   const handlePlay = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Browser Native TTS
     if ('speechSynthesis' in window) {
-      // Cancel any ongoing speech to prevent queue build-up
       window.speechSynthesis.cancel();
-      
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ja-JP';
-      utterance.rate = 0.9; // Slightly slower for clarity
-      
-      // Mobile Safari fix: explicit voice selection helps sometimes, 
-      // but lang='ja-JP' is usually sufficient for native behavior.
+      utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -94,8 +87,25 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     setInput('');
     setFeedback('idle');
     setShowHint(false);
+    
+    // Default focus attempt (for non-click transitions)
     setTimeout(() => inputRef.current?.focus(), 50);
   }, [verbs]);
+
+  // NEW: Manual handler for the "Next" button with IOS-COMPATIBLE FOCUS
+  const handleNext = () => {
+    // IOS FIX: We must focus SYNCHRONOUSLY within the click event.
+    // We cannot wait for React state updates or Timeouts, or iOS will block the keyboard.
+    if (inputRef.current) {
+      // 1. Force the input to be writable immediately (bypassing React for a microsecond)
+      inputRef.current.readOnly = false;
+      // 2. Trigger focus while we still have the user's "click" permission
+      inputRef.current.focus();
+    }
+
+    onComplete();
+    nextQuestion();
+  };
 
   useEffect(() => { 
     if (!currentVerb && verbs.length > 0) {
@@ -107,14 +117,13 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if (feedback !== 'idle' && e.key === 'Enter') {
         e.preventDefault();
-        onComplete();
-        nextQuestion();
+        handleNext(); // Use shared handler
       }
     };
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [feedback, onComplete, nextQuestion]); 
+  }, [feedback, handleNext]); 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = toHiragana(e.target.value, { IMEMode: true });
@@ -159,11 +168,8 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
   );
 
   return (
-    // FIX 1 & 2: 
-    // - justify-start: Anchors content to top on mobile (Fixes the gap & keyboard issue)
-    // - md:justify-center: Keeps it centered on Desktop
-    // - pt-20: Adds breathing room at the top on mobile so it's not glued to the header
-    <div className="max-w-xl mx-auto min-h-[100dvh] flex flex-col justify-start md:justify-center p-4 pt-20 md:pt-0">
+    // FIX 1: Reduced top padding from pt-20 to pt-16 (Save 16px)
+    <div className="max-w-xl mx-auto min-h-[100dvh] flex flex-col justify-start md:justify-center p-4 pt-16 md:pt-0">
       
       <div className="flex-shrink-0">
         <div className="flex items-end justify-between mb-2 px-2">
@@ -175,7 +181,6 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
           </div>
         </div>
         
-        {/* FIX 3: Tighter margin (mb-2) on mobile to save vertical pixels */}
         <div className="h-1 w-full bg-slate-800 rounded-full mb-2 md:mb-8 overflow-hidden">
           <div 
             className="h-full bg-gradient-to-r from-blue-600 via-purple-500 to-red-500 transition-all duration-500"
@@ -186,20 +191,26 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
 
       <div className="bg-slate-900 rounded-xl overflow-hidden shadow-2xl border border-slate-800 relative w-full">
         
+        {/* Watermark */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8rem] md:text-[15rem] font-black text-white/5 pointer-events-none select-none">
           {currentVerb.dictionary_kanji}
         </div>
 
-        <div className="relative z-10 p-6 md:p-12 text-center">
-          <div className="mb-4 md:mb-8">
-            <h2 className="text-5xl md:text-7xl font-black mb-2 md:mb-4 text-white drop-shadow-lg tracking-wide">
+        {/* FIX 2: Reduced padding from p-6 to p-4 (Save 20px height total) */}
+        <div className="relative z-10 p-4 md:p-12 text-center">
+          
+          {/* FIX 3: Reduced bottom margin from mb-4 to mb-2 (Save 8px) */}
+          <div className="mb-2 md:mb-8">
+            {/* FIX 4: Reduced text size from text-5xl to text-4xl (Save ~12px) */}
+            <h2 className="text-4xl md:text-7xl font-black mb-2 md:mb-4 text-white drop-shadow-lg tracking-wide">
               {currentVerb.dictionary_kanji}
             </h2>
             
             <button 
               type="button"
               onClick={() => setShowHint(true)}
-              className={`relative inline-block px-4 py-2 bg-slate-800 rounded text-slate-400 text-sm mb-4 md:mb-6 border border-slate-700 cursor-pointer transition-all duration-300 select-none hover:bg-slate-700 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500`}
+              // FIX 5: Reduced margin mb-4 to mb-2
+              className={`relative inline-block px-4 py-2 bg-slate-800 rounded text-slate-400 text-sm mb-2 md:mb-6 border border-slate-700 cursor-pointer transition-all duration-300 select-none hover:bg-slate-700 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500`}
               title="Click to reveal definition"
               aria-label={showHint ? "Definition revealed" : "Click to reveal definition hint"}
               aria-pressed={showHint}
@@ -248,9 +259,10 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
             />
           </form>
 
-          <div className="h-20 md:h-24 mt-4 md:mt-6 flex items-center justify-center">
+          {/* FIX 6: Reduced min-height from 8rem to 6rem (Save 32px) */}
+          <div className="min-h-[6rem] mt-4 md:mt-6 flex flex-col items-center justify-center">
             {feedback === 'correct' && (
-              <div className="animate-bounce-in">
+              <div className="animate-bounce-in flex flex-col items-center w-full">
                 <div className="text-emerald-400 font-bold text-lg md:text-xl tracking-wider mb-1">
                   IPPON! (Correct)
                 </div>
@@ -258,11 +270,19 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
                   {currentVerb.conj_kanji} / {currentVerb.conj_kana}
                   <AudioButton text={currentVerb.conj_kana} />
                 </div>
-                <div className="mt-2 text-xs uppercase tracking-widest text-slate-500 opacity-50">[ Press Enter ]</div>
+                
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="mt-2 px-6 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 rounded text-emerald-400 font-bold tracking-widest text-sm transition-all active:scale-95 w-full md:w-auto"
+                >
+                  NEXT ❯
+                </button>
               </div>
             )}
+            
             {feedback === 'incorrect' && (
-              <div className="animate-shake">
+              <div className="animate-shake flex flex-col items-center w-full">
                 <div className="text-red-500 font-bold text-lg md:text-xl tracking-wider mb-1">KILLED IN ACTION</div>
                 <div className="text-slate-400 text-sm md:text-base">
                   Answer: <span className="text-white font-bold">{currentVerb.conj_kanji}</span>
@@ -271,7 +291,14 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
                  ({currentVerb.conj_kana})
                  <AudioButton text={currentVerb.conj_kana} />
                 </div>
-                <div className="mt-4 text-xs uppercase tracking-widest text-slate-500 opacity-50">[ Press Enter to Revive ]</div>
+
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="mt-2 px-6 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded text-red-400 font-bold tracking-widest text-sm transition-all active:scale-95 w-full md:w-auto"
+                >
+                  CONTINUE ❯
+                </button>
               </div>
             )}
           </div>
