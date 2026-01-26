@@ -9,6 +9,49 @@ interface Props {
   onComplete: () => void;
 }
 
+// -- SUB-COMPONENT: AUDIO BUTTON --
+// Extracted for DRY/SoC and performance
+const AudioButton: React.FC<{ text: string }> = ({ text }) => {
+  const handlePlay = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Browser Native TTS
+    if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech to prevent queue build-up
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ja-JP';
+      utterance.rate = 0.9; // Slightly slower for clarity
+      
+      // Mobile Safari fix: explicit voice selection helps sometimes, 
+      // but lang='ja-JP' is usually sufficient for native behavior.
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handlePlay}
+      aria-label="Pronounce answer"
+      className="inline-flex items-center justify-center p-2 rounded-full ml-2 opacity-70 hover:opacity-100 hover:bg-white/10 transition-all focus:outline-none focus:ring-2 focus:ring-current text-current cursor-pointer"
+      title="Play pronunciation"
+    >
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        viewBox="0 0 24 24" 
+        fill="currentColor" 
+        className="w-6 h-6 md:w-5 md:h-5"
+      >
+        <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 2.485.519 4.814 1.442 6.896.26 1.259 1.488 1.604 2.566 1.604h1.932l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06zM18.584 5.106a.75.75 0 011.06 0c3.808 3.807 3.808 9.98 0 13.788a.75.75 0 11-1.06-1.06 8.25 8.25 0 000-11.668.75.75 0 010-1.06z" />
+        <path d="M15.932 7.757a.75.75 0 011.061 0 6 6 0 010 8.486.75.75 0 01-1.06-1.061 4.5 4.5 0 000-6.364.75.75 0 010-1.06z" />
+      </svg>
+    </button>
+  );
+};
+
 const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
   const [currentVerb, setCurrentVerb] = useState<Verb | null>(null);
   const [input, setInput] = useState('');
@@ -119,7 +162,7 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     // FIX 1 & 2: 
     // - justify-start: Anchors content to top on mobile (Fixes the gap & keyboard issue)
     // - md:justify-center: Keeps it centered on Desktop
-    // - pt-4: Adds breathing room at the top on mobile so it's not glued to the header
+    // - pt-20: Adds breathing room at the top on mobile so it's not glued to the header
     <div className="max-w-xl mx-auto min-h-[100dvh] flex flex-col justify-start md:justify-center p-4 pt-20 md:pt-0">
       
       <div className="flex-shrink-0">
@@ -208,8 +251,13 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
           <div className="h-20 md:h-24 mt-4 md:mt-6 flex items-center justify-center">
             {feedback === 'correct' && (
               <div className="animate-bounce-in">
-                <div className="text-emerald-400 font-bold text-lg md:text-xl tracking-wider mb-1">IPPON! (Correct)</div>
-                <div className="text-slate-400 font-mono text-sm md:text-base">{currentVerb.conj_kanji} / {currentVerb.conj_kana}</div>
+                <div className="text-emerald-400 font-bold text-lg md:text-xl tracking-wider mb-1">
+                  IPPON! (Correct)
+                </div>
+                <div className="text-slate-400 font-mono text-sm md:text-base flex items-center gap-1">
+                  {currentVerb.conj_kanji} / {currentVerb.conj_kana}
+                  <AudioButton text={currentVerb.conj_kana} />
+                </div>
                 <div className="mt-2 text-xs uppercase tracking-widest text-slate-500 opacity-50">[ Press Enter ]</div>
               </div>
             )}
@@ -219,8 +267,9 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
                 <div className="text-slate-400 text-sm md:text-base">
                   Answer: <span className="text-white font-bold">{currentVerb.conj_kanji}</span>
                 </div>
-                <div className="text-slate-500 text-xs md:text-sm mt-1">
+                <div className="text-slate-500 text-xs md:text-sm mt-1 flex items-center justify-center gap-1">
                  ({currentVerb.conj_kana})
+                 <AudioButton text={currentVerb.conj_kana} />
                 </div>
                 <div className="mt-4 text-xs uppercase tracking-widest text-slate-500 opacity-50">[ Press Enter to Revive ]</div>
               </div>
