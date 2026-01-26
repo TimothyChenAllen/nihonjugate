@@ -1,5 +1,13 @@
 # ⛩️ Nihonjugate Release Notes
 
+## v1.2.0: Mobile Maneuverability
+**Release Date:** January 26, 2026
+**Focus:** Mobile Navigation & Accessibility
+
+### 📱 Mobile Upgrades
+* **"Next Question" Button:** Introduced explicit "NEXT ❯" and "CONTINUE ❯" buttons that appear after answering. This solves the issue where dismissing the mobile keyboard left the user without an "Enter" key to advance the quiz.
+* **Layout Stability:** Increased the feedback area minimum height (`min-h-[8rem]`) to accommodate the new buttons without causing layout shifts or jumpiness.
+
 ## v1.1.0: Audio Intelligence
 **Release Date:** January 26, 2026
 **Focus:** Audio Feedback & Accessibility
