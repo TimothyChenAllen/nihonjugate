@@ -1,5 +1,18 @@
 # ⛩️ Nihonjugate Release Notes
 
+## v1.3.0: Mission Control & iOS Protocols
+**Release Date:** January 27, 2026
+**Focus:** Configuration UI & iOS Compatibility
+
+### 🗺️ Tactical Grid Upgrades
+* **Rich Intel Display:** Configuration buttons now display the **Kanji and Kana preview** for every conjugation form, allowing users to see exactly what they are enabling before selecting it.
+* **Bulk Command Protocols:**
+    * **Global Override:** Added "SELECT ALL" and "DESELECT ALL" buttons to instantly toggle the entire database.
+    * **Unit Control:** Added per-verb "Select All" / "Clear" buttons to quickly configure specific verb groups (e.g., enabling all forms of *Taberu*).
+
+### 📱 Mobile Field Fixes
+* **iOS Keyboard Sync:** Implemented a synchronous focus override to bypass Safari's security restrictions. Clicking "NEXT ❯" on an iPhone now correctly forces the keyboard to remain open/re-open for the subsequent question.
+
 ## v1.2.0: Mobile Maneuverability
 **Release Date:** January 26, 2026
 **Focus:** Mobile Navigation & Accessibility
