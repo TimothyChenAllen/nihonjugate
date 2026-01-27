@@ -129,7 +129,7 @@ const ConfigGrid: React.FC<Props> = ({ verbs, onUpdate }) => {
             </div>
 
             {/* Card Body */}
-            <div className="grid grid-cols-2 gap-1 p-2 h-full">
+            <div className="grid grid-cols-2 gap-1 p-2">
               {forms.map(v => (
                 <button
                   key={v.id}
