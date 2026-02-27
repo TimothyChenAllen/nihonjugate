@@ -8,6 +8,7 @@ export interface Verb {
   conj_kanji: string;
   conj_kana: string;
   conj_romaji: string;
+  verb_class: string; // NEW FIELD
   correct_count: number;
   attempt_count: number;
   is_active: number;
