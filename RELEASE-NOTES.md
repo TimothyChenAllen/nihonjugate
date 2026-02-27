@@ -1,5 +1,18 @@
 # ⛩️ Nihonjugate Release Notes
 
+## v1.4.0: Dynamic Rules Engine
+**Release Date:** February 27, 2026
+**Focus:** Grammar Education & Architecture
+
+### 🧠 Logic Engine Upgrades
+* **External Database Sync:** Disconnected the hardcoded CSV string. The server now dynamically reads directly from `verbs.csv` using the Node.js file system, allowing for independent content updates.
+* **Morphology Brain (`rules.ts`):** Implemented a central rules engine that calculates conjugation instructions on the fly based on a new `Verb_Class` matrix (e.g., distinguishing between `Godan-ku` and `Godan-su`).
+* **Safe Migrations:** Added a database migration layer that safely injects new schema columns (like `verb_class`) into local SQLite instances without wiping out user score histories.
+
+### 📱 UI/UX Additions
+* **Bottom-Sheet Rule Modal:** When an answer is failed, users can now request a hint. The UI summons a mobile-optimized "bottom sheet" (or centered modal on desktop) displaying the precise morphological rule to conjugate that verb class into the requested form.
+* **Smart Exception Handling:** The rule engine intercepts highly irregular exceptions (such as the `Te-Form` of 行く) and provides custom textual explanations.
+
 ## v1.3.0: Mission Control & iOS Protocols
 **Release Date:** January 27, 2026
 **Focus:** Configuration UI & iOS Compatibility
