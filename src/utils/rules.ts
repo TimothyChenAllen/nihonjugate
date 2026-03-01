@@ -1,5 +1,57 @@
+import { Verb } from '../types';
+
+export function getUsage(formName: string): string {
+  switch (formName) {
+    case 'Te-Form': return "Used to connect simultaneous or sequential actions, events, or states. Also forms expressions such as requests, actions happening currently, and can combine with other forms to create different tenses, though it does not indicate tense by itself.";
+    case 'Past Tense (Plain)': return "Used to state actions or events completed in the past in casual speech, or to modify nouns as a relative clause.";
+    case 'Negative Form': return "Used to state that an action will not happen or is not a habitual action in casual speech.";
+    case 'Past-Negative Form': return "Used to state that an action did not happen in the past in casual speech.";
+    case 'Polite Form': return "Used in formal situations, when speaking to someone of higher status, or someone you don't know well (Masu form).";
+    case 'Masu Stem': return "The base form used to connect to other suffixes (like -tai for desire, -nasai for commands), combine with other verbs, or sometimes function as a noun.";
+    case 'Continuous Form': return "Used to express an ongoing action (present progressive, like '-ing' in English) or a continuing state resulting from an action.";
+    case 'Passive Form': return "Used when the subject is the receiver of an action. In Japanese, it often implies the subject is adversely affected by the action.";
+    case 'Causative Form': return "Used to indicate making someone do something (force) or letting someone do something (permission).";
+    case 'Causative Passive Form': return "Used to indicate being made to do something against one's will by someone else.";
+    case 'Imperative Form': return "A strong, blunt command form. Used in emergencies, by men in very casual speech, or when quoting a command.";
+    case 'BA Hypothetical Form': return "Used to express a condition ('if X happens...'). Often used when a positive or natural outcome is expected if the condition is met.";
+    case 'TARA Conditional Form': return "Used to express a condition or sequence ('if/when X happens, then Y'). It is highly versatile and focuses on the sequence of events.";
+    case 'Potential Form': return "Used to express the physical ability to do something ('can do') or the possibility of an action.";
+    case 'Volitional Form': return "Used to express the speaker's intention, propose an action to a group ('let's...'), or offer to do something in casual speech.";
+    default: return "Usage for this form is not documented.";
+  }
+}
+
+export function getApplication(verb: Verb): string {
+  let baseKanji = verb.dictionary_kanji.slice(0, -1);
+  let suffixKanji = verb.conj_kanji.slice(baseKanji.length);
+  
+  if (verb.verb_class === 'Irregular-suru') {
+    if (verb.dictionary_kanji === 'する') {
+      baseKanji = '';
+    } else if (verb.dictionary_kanji.endsWith('する')) {
+      baseKanji = verb.dictionary_kanji.slice(0, -2);
+    }
+    suffixKanji = verb.conj_kanji.slice(baseKanji.length);
+  }
+  
+  // 行く exception
+  if (verb.dictionary_kanji === '行く' && (verb.form_name === 'Te-Form' || verb.form_name === 'Past Tense (Plain)')) {
+     baseKanji = '行';
+     suffixKanji = verb.conj_kanji.slice(1);
+  }
+
+  // Fallback for kana-only verbs where kanji slicing fails to match
+  if (!verb.conj_kanji.startsWith(baseKanji) && baseKanji !== '') {
+     return `${verb.dictionary_kanji} -> ${verb.conj_kanji} (${verb.conj_kana})`;
+  }
+
+  let equation = `${baseKanji} + ${suffixKanji}`;
+  if (baseKanji === '') equation = suffixKanji;
+
+  return `${verb.dictionary_kanji} -> ${equation} = ${verb.conj_kanji} (${verb.conj_kana})`;
+}
+
 export function getRule(verbClass: string, formName: string, kanji: string): string {
-  // Edge Case Intercept: 行く exception (Now using single quotes for the parser)
   if (kanji === '行く' && (formName === 'Te-Form' || formName === 'Past Tense (Plain)')) {
     return `EXCEPTION: Normally a Godan-ku verb becomes 'いて' (ite) / 'いた' (ita), but '行く' is highly irregular and becomes '行って' (itte) / '行った' (itta).`;
   }
