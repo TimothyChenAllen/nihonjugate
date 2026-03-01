@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { toHiragana } from 'wanakana';
 import { Verb } from '../types';
-import { getRule } from '../utils/rules'; // <-- Import the rules engine
+import { getRule, getUsage, getApplication } from '../utils/rules';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -39,27 +39,18 @@ const AudioButton: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
-// -- SUB-COMPONENT: RULE FORMATTER --
-// Automatically parses strings and highlights text wrapped in 'single quotes'
 const RuleFormatter: React.FC<{ text: string }> = ({ text }) => {
-  // Regex splits the text by single quotes, keeping the matched quoted text as separate array items
   const parts = text.split(/'([^']+)'/g);
-  
   return (
     <p className="leading-relaxed">
       {parts.map((part, i) => {
-        // Because of how split works, the quoted text will always end up on ODD indices (1, 3, 5...)
         if (i % 2 === 1) {
           return (
-            <span 
-              key={i} 
-              className="inline-block px-1.5 py-0.5 mx-0.5 font-bold text-emerald-400 bg-emerald-950/50 border border-emerald-900/50 rounded-md shadow-sm whitespace-nowrap"
-            >
+            <span key={i} className="inline-block px-1.5 py-0.5 mx-0.5 font-bold text-emerald-400 bg-emerald-950/50 border border-emerald-900/50 rounded-md shadow-sm whitespace-nowrap">
               {part}
             </span>
           );
         }
-        // Normal text ends up on EVEN indices (0, 2, 4...)
         return <React.Fragment key={i}>{part}</React.Fragment>;
       })}
     </p>
@@ -72,8 +63,6 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
   const [feedback, setFeedback] = useState<'idle' | 'correct' | 'incorrect'>('idle');
   const [streak, setStreak] = useState(0);
   const [showHint, setShowHint] = useState(false);
-  
-  // NEW: Rule Modal State
   const [showRuleModal, setShowRuleModal] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
@@ -110,7 +99,7 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
     setInput('');
     setFeedback('idle');
     setShowHint(false);
-    setShowRuleModal(false); // Ensure modal resets
+    setShowRuleModal(false);
   }, [verbs]);
 
   const handleNext = () => {
@@ -134,7 +123,6 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
         e.preventDefault();
         handleNext(); 
       }
-      // Allow Esc key to close modal
       if (showRuleModal && e.key === 'Escape') {
           setShowRuleModal(false);
       }
@@ -273,13 +261,22 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
                     <AudioButton text={currentVerb.conj_kana} />
                   </div>
                   
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    className="mt-2 px-6 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 rounded text-emerald-400 font-bold tracking-widest text-sm transition-all active:scale-95 w-full md:w-auto"
-                  >
-                    NEXT ❯
-                  </button>
+                  <div className="flex gap-2 mt-3 w-full md:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setShowRuleModal(true)}
+                      className="flex-1 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 rounded text-emerald-400 font-bold tracking-widest text-sm transition-all active:scale-95 whitespace-nowrap"
+                    >
+                      💡 RULE
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNext}
+                      className="flex-1 px-6 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 rounded text-emerald-400 font-bold tracking-widest text-sm transition-all active:scale-95"
+                    >
+                      NEXT ❯
+                    </button>
+                  </div>
                 </div>
               )}
               
@@ -294,7 +291,6 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
                    <AudioButton text={currentVerb.conj_kana} />
                   </div>
 
-                  {/* NEW: Button Row for mobile constraints */}
                   <div className="flex gap-2 mt-3 w-full md:w-auto">
                     <button
                       type="button"
@@ -318,20 +314,18 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
         </div>
       </div>
 
-      {/* NEW: Bottom-Sheet Modal for Grammar Rules */}
       {showRuleModal && currentVerb && (
         <div 
           className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity"
-          onClick={() => setShowRuleModal(false)} // Close if clicked outside
+          onClick={() => setShowRuleModal(false)}
         >
-          {/* Prevent clicks inside the modal from closing it */}
           <div 
             className="w-full max-w-xl bg-slate-900 border-t md:border border-slate-700 md:rounded-xl rounded-t-2xl shadow-2xl p-6 pb-12 md:pb-6 animate-slide-up"
             onClick={e => e.stopPropagation()} 
           >
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="text-amber-400 font-bold tracking-widest uppercase text-sm mb-1">Grammar Rule</h3>
+                <h3 className="text-amber-400 font-bold tracking-widest uppercase text-sm mb-1">Grammar Data</h3>
                 <h4 className="text-white text-xl font-bold">{currentVerb.form_name}</h4>
                 <div className="text-slate-400 text-sm mt-1">Class: <span className="text-slate-200">{currentVerb.verb_class}</span></div>
               </div>
@@ -343,11 +337,28 @@ const Quiz: React.FC<Props> = ({ verbs, onComplete }) => {
                 ✕
               </button>
             </div>
-            <div className="bg-slate-950 p-5 rounded-lg border border-slate-800 text-slate-300 text-lg md:text-xl">
-              <RuleFormatter 
-                text={getRule(currentVerb.verb_class, currentVerb.form_name, currentVerb.dictionary_kanji)} 
-              />
+            
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+              <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 text-slate-300">
+                <h5 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Usage</h5>
+                <p className="text-sm leading-relaxed">{getUsage(currentVerb.form_name)}</p>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 text-slate-300">
+                <h5 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Rule</h5>
+                <div className="text-base md:text-lg">
+                  <RuleFormatter text={getRule(currentVerb.verb_class, currentVerb.form_name, currentVerb.dictionary_kanji)} />
+                </div>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 text-slate-300">
+                <h5 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Application</h5>
+                <div className="font-mono text-emerald-400 text-center py-3 bg-black/50 rounded border border-emerald-900/30 text-lg md:text-xl">
+                  {getApplication(currentVerb)}
+                </div>
+              </div>
             </div>
+
             <button
               onClick={() => setShowRuleModal(false)}
               className="w-full mt-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg transition-colors"
