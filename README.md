@@ -80,7 +80,12 @@ It utilizes a **Weighted Random Algorithm** to prioritize verbs and forms you ar
     * If correct: Press **Enter** again to advance.
     * If incorrect: The correct answer is displayed. Type it out or press Enter to continue.
 
-## 📂 Project Structure
+## 📖 Documentation
+
+* [Architecture Overview](docs/ARCHITECTURE.md) - Technical breakdown of the project structure and data flow.
+* [Release Notes](RELEASE-NOTES.md) - History of version updates.
+
+## 📁 Project Structure
 
 ```text
 nihonjugate/
