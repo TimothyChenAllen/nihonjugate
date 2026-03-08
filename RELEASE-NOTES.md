@@ -1,5 +1,18 @@
 # ⛩️ Nihonjugate Release Notes
 
+## v1.5.0: Auto-Play & Comprehensive Grammar Intel
+**Release Date:** March 8, 2026
+**Focus:** Accessibility & Expanded Context
+
+### 🔊 Audio Upgrades
+* **Auto-Play Pronunciation:** Added an "AUTO-PLAY" toggle switch. When enabled, the pronunciation of a word plays automatically after submitting an answer.
+* **Persistent Settings:** Your auto-play preference is saved to your browser's local storage so it persists between sessions.
+* **Universal Access:** The auto-play toggle can be controlled from both the main Mission Config page and the Duel interface next to the audio button.
+
+### 🧠 Grammar & Intel Expansion
+* **Always-Available Rules:** The "💡 RULE" hint button is now always accessible on the results screen, whether you answered correctly ("IPPON!") or incorrectly.
+* **Rich Rule Context:** The rule modal has been expanded. It now provides the standard morphological rule, a detailed **Usage** explanation for the grammar point, and a concrete **Application** example (showing the final conjugated word).
+
 ## v1.4.0: Dynamic Rules Engine
 **Release Date:** February 27, 2026
 **Focus:** Grammar Education & Architecture

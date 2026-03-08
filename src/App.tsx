@@ -1,16 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import Quiz from './components/Quiz';
-import ConfigGrid from './components/ConfigGrid';
-import ErrorBoundary from './components/ErrorBoundary';
-import { Verb } from './types';
+import React, { useState, useEffect } from "react";
+import Quiz from "./components/Quiz";
+import ConfigGrid from "./components/ConfigGrid";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { Verb } from "./types";
 
 // Use Env Var
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
 function App() {
-  const [view, setView] = useState<'quiz' | 'config'>('config');
+  const [view, setView] = useState<"quiz" | "config">("config");
   const [verbs, setVerbs] = useState<Verb[]>([]);
   const [loading, setLoading] = useState(true);
+  const [autoPlay, setAutoPlay] = useState(
+    () => localStorage.getItem("autoPlay") === "true",
+  );
+
+  const toggleAutoPlay = () => {
+    setAutoPlay((prev) => {
+      const next = !prev;
+      localStorage.setItem("autoPlay", String(next));
+      return next;
+    });
+  };
 
   const fetchVerbs = async () => {
     try {
@@ -28,22 +39,23 @@ function App() {
     fetchVerbs();
   }, []);
 
-  if (loading) return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center text-red-500 font-mono animate-pulse">
-      INITIALIZING NIHONJUGATE...
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-red-500 font-mono animate-pulse">
+        INITIALIZING NIHONJUGATE...
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-red-900 selection:text-white">
       <nav className="border-b border-red-900/30 bg-gradient-to-r from-slate-900 to-slate-950 shadow-lg relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-700 via-red-500 to-red-700"></div>
-        
+
         <div className="container mx-auto px-6 py-4 flex justify-between items-center relative z-10">
           {/* ACCESSIBILITY FIX: Use button */}
-          <button 
-            className="flex items-center gap-3 select-none hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-red-500 rounded p-1" 
-            onClick={() => setView('config')}
+          <button
+            className="flex items-center gap-3 select-none hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-red-500 rounded p-1"
+            onClick={() => setView("config")}
             aria-label="Go to Configuration Grid"
           >
             <div className="flex flex-col items-center justify-center w-10 h-10 bg-red-600 rounded text-slate-900 font-black text-xl leading-none shadow-red-500/20 shadow-lg">
@@ -60,22 +72,25 @@ function App() {
           </button>
 
           <div className="flex gap-2 bg-slate-900/50 p-1 rounded-lg border border-slate-800">
-            <button 
-              onClick={() => setView('config')}
+            <button
+              onClick={() => setView("config")}
               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
-                view === 'config' 
-                  ? 'bg-slate-700 text-white shadow-sm' 
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                view === "config"
+                  ? "bg-slate-700 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800"
               }`}
             >
               GRID
             </button>
-            <button 
-              onClick={() => { fetchVerbs(); setView('quiz'); }}
+            <button
+              onClick={() => {
+                fetchVerbs();
+                setView("quiz");
+              }}
               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
-                view === 'quiz' 
-                  ? 'bg-red-600 text-white shadow-red-900/20 shadow-lg' 
-                  : 'text-red-400 hover:text-red-300 hover:bg-red-900/20'
+                view === "quiz"
+                  ? "bg-red-600 text-white shadow-red-900/20 shadow-lg"
+                  : "text-red-400 hover:text-red-300 hover:bg-red-900/20"
               }`}
             >
               DUEL
@@ -85,11 +100,21 @@ function App() {
       </nav>
 
       <main className="container mx-auto p-6 max-w-5xl">
-        {view === 'config' ? (
-          <ConfigGrid verbs={verbs} onUpdate={fetchVerbs} />
+        {view === "config" ? (
+          <ConfigGrid
+            verbs={verbs}
+            onUpdate={fetchVerbs}
+            autoPlay={autoPlay}
+            toggleAutoPlay={toggleAutoPlay}
+          />
         ) : (
-          <ErrorBoundary> 
-            <Quiz verbs={verbs} onComplete={() => fetchVerbs()} />
+          <ErrorBoundary>
+            <Quiz
+              verbs={verbs}
+              onComplete={() => fetchVerbs()}
+              autoPlay={autoPlay}
+              toggleAutoPlay={toggleAutoPlay}
+            />
           </ErrorBoundary>
         )}
       </main>
