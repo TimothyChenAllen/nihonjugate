@@ -179,3 +179,79 @@ Dictionary_Kanji,Dictionary_Kana,Dictionary_Romaji,Meaning,Form_Name,Conj_Kanji,
 押す,おす,Osu,To push,TARA Conditional Form,押したら,おしたら,Oshitara,Godan-su
 押す,おす,Osu,To push,Potential Form,押せる,おせる,Oseru,Godan-su
 押す,おす,Osu,To push,Volitional Form,押そう,おそう,Osou,Godan-su
+する,する,Suru,To do,Polite Form,します,します,Shimasu,Irregular-Suru
+する,する,Suru,To do,Masu Stem,し,し,Shi,Irregular-Suru
+する,する,Suru,To do,Te-Form,して,して,Shite,Irregular-Suru
+する,する,Suru,To do,Past Tense (Plain),した,した,Shita,Irregular-Suru
+する,する,Suru,To do,Continuous Form,している,している,Shiteiru,Irregular-Suru
+する,する,Suru,To do,Negative Form,しない,しない,Shinai,Irregular-Suru
+する,する,Suru,To do,Past-Negative Form,しなかった,しなかった,Shinakatta,Irregular-Suru
+する,する,Suru,To do,Passive Form,される,される,Sareru,Irregular-Suru
+する,する,Suru,To do,Causative Form,させる,させる,Saseru,Irregular-Suru
+する,する,Suru,To do,Causative Passive Form,させられる,させられる,Saserareru,Irregular-Suru
+する,する,Suru,To do,Imperative Form,しろ,しろ,Shiro,Irregular-Suru
+する,する,Suru,To do,BA Hypothetical Form,すれば,すれば,Sureba,Irregular-Suru
+する,する,Suru,To do,TARA Conditional Form,したら,したら,Shitara,Irregular-Suru
+する,する,Suru,To do,Potential Form,できる,できる,Dekiru,Irregular-Suru
+する,する,Suru,To do,Volitional Form,しよう,しよう,Shiyou,Irregular-Suru
+来る,くる,Kuru,To come,Polite Form,来ます,きます,Kimasu,Irregular-Kuru
+来る,くる,Kuru,To come,Masu Stem,来,き,Ki,Irregular-Kuru
+来る,くる,Kuru,To come,Te-Form,来て,きて,Kite,Irregular-Kuru
+来る,くる,Kuru,To come,Past Tense (Plain),来た,きた,Kita,Irregular-Kuru
+来る,くる,Kuru,To come,Continuous Form,来ている,きている,Kiteiru,Irregular-Kuru
+来る,くる,Kuru,To come,Negative Form,来ない,こない,Konai,Irregular-Kuru
+来る,くる,Kuru,To come,Past-Negative Form,来なかった,こなかった,Konakatta,Irregular-Kuru
+来る,くる,Kuru,To come,Passive Form,来られる,こられる,Korareru,Irregular-Kuru
+来る,くる,Kuru,To come,Causative Form,来させる,こさせる,Kosaseru,Irregular-Kuru
+来る,くる,Kuru,To come,Causative Passive Form,来させられる,こさせられる,Kosaserareru,Irregular-Kuru
+来る,くる,Kuru,To come,Imperative Form,来い,こい,Koi,Irregular-Kuru
+来る,くる,Kuru,To come,BA Hypothetical Form,来れば,くれば,Kureba,Irregular-Kuru
+来る,くる,Kuru,To come,TARA Conditional Form,来たら,きたら,Kitara,Irregular-Kuru
+来る,くる,Kuru,To come,Potential Form,来られる,こられる,Korareru,Irregular-Kuru
+来る,くる,Kuru,To come,Volitional Form,来よう,こよう,Koyou,Irregular-Kuru
+行く,いく,Iku,To go,Polite Form,行きます,いきます,Ikimasu,Godan-ku-iku
+行く,いく,Iku,To go,Masu Stem,行き,いき,Iki,Godan-ku-iku
+行く,いく,Iku,To go,Te-Form,行って,いって,Itte,Godan-ku-iku
+行く,いく,Iku,To go,Past Tense (Plain),行った,いった,Itta,Godan-ku-iku
+行く,いく,Iku,To go,Continuous Form,行っている,いっている,Itteiru,Godan-ku-iku
+行く,いく,Iku,To go,Negative Form,行かない,いかない,Ikanai,Godan-ku-iku
+行く,いく,Iku,To go,Past-Negative Form,行かなかった,いかなかった,Ikanakatta,Godan-ku-iku
+行く,いく,Iku,To go,Passive Form,行かれる,いかれる,Ikareru,Godan-ku-iku
+行く,いく,Iku,To go,Causative Form,行かせる,いかせる,Ikaseru,Godan-ku-iku
+行く,いく,Iku,To go,Causative Passive Form,行かせられる,いかせられる,Ikaserareru,Godan-ku-iku
+行く,いく,Iku,To go,Imperative Form,行け,いけ,Ike,Godan-ku-iku
+行く,いく,Iku,To go,BA Hypothetical Form,行けば,いけば,Ikeba,Godan-ku-iku
+行く,いく,Iku,To go,TARA Conditional Form,行ったら,いったら,Ittara,Godan-ku-iku
+行く,いく,Iku,To go,Potential Form,行ける,いける,Ikeru,Godan-ku-iku
+行く,いく,Iku,To go,Volitional Form,行こう,いこう,Ikou,Godan-ku-iku
+
+死ぬ,しぬ,Shinu,To die,Polite Form,死にます,しにます,Shinimasu,Godan-nu
+死ぬ,しぬ,Shinu,To die,Masu Stem,死に,しに,Shini,Godan-nu
+死ぬ,しぬ,Shinu,To die,Te-Form,死んで,しんで,Shinde,Godan-nu
+死ぬ,しぬ,Shinu,To die,Past Tense (Plain),死んだ,しんだ,Shinda,Godan-nu
+死ぬ,しぬ,Shinu,To die,Continuous Form,死んでいる,しんでいる,Shindeiru,Godan-nu
+死ぬ,しぬ,Shinu,To die,Negative Form,死なない,しなない,Shinanai,Godan-nu
+死ぬ,しぬ,Shinu,To die,Past-Negative Form,死ななかった,しななかった,Shinanakatta,Godan-nu
+死ぬ,しぬ,Shinu,To die,Passive Form,死なれる,しなれる,Shinareru,Godan-nu
+死ぬ,しぬ,Shinu,To die,Causative Form,死なせる,しなせる,Shinaseru,Godan-nu
+死ぬ,しぬ,Shinu,To die,Causative Passive Form,死なせられる,しなせられる,Shinaserareru,Godan-nu
+死ぬ,しぬ,Shinu,To die,Imperative Form,死ね,しね,Shine,Godan-nu
+死ぬ,しぬ,Shinu,To die,BA Hypothetical Form,死ねば,しねば,Shineba,Godan-nu
+死ぬ,しぬ,Shinu,To die,TARA Conditional Form,死んだら,しんだら,Shindara,Godan-nu
+死ぬ,しぬ,Shinu,To die,Potential Form,死ねる,しねる,Shineru,Godan-nu
+死ぬ,しぬ,Shinu,To die,Volitional Form,死のう,しのう,Shinou,Godan-nu
+作る,つくる,Tsukuru,To make,Polite Form,作ります,つくります,Tsukurimasu,Godan-ru
+作る,つくる,Tsukuru,To make,Masu Stem,作り,つくり,Tsukuri,Godan-ru
+作る,つくる,Tsukuru,To make,Te-Form,作って,つくって,Tsukutte,Godan-ru
+作る,つくる,Tsukuru,To make,Past Tense (Plain),作った,つくった,Tsukutta,Godan-ru
+作る,つくる,Tsukuru,To make,Continuous Form,作っている,つくっている,Tsukutteiru,Godan-ru
+作る,つくる,Tsukuru,To make,Negative Form,作らない,つくらない,Tsukuranai,Godan-ru
+作る,つくる,Tsukuru,To make,Past-Negative Form,作らなかった,つくらなかった,Tsukuranakatta,Godan-ru
+作る,つくる,Tsukuru,To make,Passive Form,作られる,つくられる,Tsukurareru,Godan-ru
+作る,つくる,Tsukuru,To make,Causative Form,作らせる,つくらせる,Tsukuraseru,Godan-ru
+作る,つくる,Tsukuru,To make,Causative Passive Form,作らせられる,つくらせられる,Tsukuraserareru,Godan-ru
+作る,つくる,Tsukuru,To make,Imperative Form,作れ,つくれ,Tsukure,Godan-ru
+作る,つくる,Tsukuru,To make,BA Hypothetical Form,作れば,つくれば,Tsukureba,Godan-ru
+作る,つくる,Tsukuru,To make,TARA Conditional Form,作ったら,つくったら,Tsukuttara,Godan-ru
+作る,つくる,Tsukuru,To make,Potential Form,作れる,つくれる,Tsukureru,Godan-ru
+作る,つくる,Tsukuru,To make,Volitional Form,作ろう,つくろう,Tsukurou,Godan-ru
