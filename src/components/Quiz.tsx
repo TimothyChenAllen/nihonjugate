@@ -176,7 +176,7 @@ const Quiz: React.FC<Props> = ({
       normalizedInput === correctKana || cleanInput === correctKanji;
 
     setFeedback(isCorrect ? "correct" : "incorrect");
-    if (!isCorrect) setShowHint(true);
+    setShowHint(true);
     if (isCorrect) setStreak((s) => s + 1);
     else setStreak(0);
 
